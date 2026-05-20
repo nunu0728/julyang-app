@@ -1,0 +1,1175 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color: #292524;
+  background: #fff7ed;
+  font-family: "Arial Rounded MT Bold", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff1f2, #fff7ed, #fef3c7);
+}
+
+.page.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 32px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 45px rgba(120, 53, 15, 0.11);
+}
+
+.app-button {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 18px;
+  color: white;
+  background: #fb7185;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(251, 113, 133, 0.18);
+}
+
+.app-button:hover {
+  filter: brightness(0.98);
+}
+
+.app-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.app-button.dark {
+  background: #1c1917;
+}
+
+.app-button.white {
+  background: white;
+  color: #292524;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.app-button.small {
+  width: auto;
+  min-width: 76px;
+}
+
+.icon-badge {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.icon-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.main-header,
+.simple-header {
+  position: relative;
+  padding-top: 16px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.main-header h1,
+.simple-header h1,
+.login-title h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.main-header p,
+.simple-header p {
+  margin: 6px 0 0;
+  color: #44403c;
+  font-size: 14px;
+}
+
+.text-link {
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.trend-button,
+.ranking-button {
+  position: absolute;
+  top: 16px;
+  border: 0;
+  border-radius: 18px;
+  background: white;
+  color: #292524;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.trend-button {
+  left: 0;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 11px;
+}
+
+.trend-button p {
+  margin: 0;
+  color: #292524;
+}
+
+.ranking-button {
+  right: 0;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.up {
+  color: #f43f5e !important;
+}
+
+.down {
+  color: #3b82f6 !important;
+}
+
+.login-title {
+  text-align: center;
+}
+
+.login-title .icon-badge {
+  background: #fff1f2;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 18px;
+  background: #e7e5e4;
+  margin: 18px 0;
+}
+
+.tabs button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px;
+  color: #292524;
+  background: transparent;
+  font-weight: 700;
+}
+
+.tabs button.active {
+  color: #292524;
+  background: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.field {
+  display: block;
+  margin-bottom: 12px;
+  color: #44403c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input,
+.input-row input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px 14px;
+  border: 1px solid #e7e5e4;
+  border-radius: 18px;
+  outline: none;
+  background: white;
+  color: #292524;
+}
+
+.field-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid #e7e5e4;
+  border-radius: 18px;
+  background: white;
+}
+
+.field-box input {
+  margin: 0;
+  border: 0;
+  padding-left: 0;
+}
+
+.error {
+  padding: 12px 14px;
+  border-radius: 16px;
+  color: #f43f5e;
+  background: #fff1f2;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.notice-box,
+.notice-line {
+  padding: 14px;
+  border-radius: 22px;
+  color: #44403c;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.notice-line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.notice-line p {
+  margin: 0;
+}
+
+.main-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.main-stat-row p {
+  margin: 0 0 4px;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.main-stat-row strong {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.main-stat-row strong span {
+  font-size: 17px;
+}
+
+.standard-badge {
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.gauge-wrap {
+  height: 176px;
+  margin: 8px 0;
+}
+
+.gauge-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-wrap text {
+  fill: #44403c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  gap: 8px;
+}
+
+.grid.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.mini-stat,
+.stat-box {
+  padding: 14px 10px;
+  border-radius: 18px;
+  background: #f5f5f4;
+  text-align: center;
+}
+
+.mini-stat p,
+.stat-box p {
+  margin: 0 0 5px;
+  color: #292524;
+  font-size: 12px;
+}
+
+.mini-stat strong,
+.stat-box strong {
+  font-size: 16px;
+}
+
+.stat-box strong {
+  font-size: 24px;
+}
+
+.title-row,
+.calendar-head > div,
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-row h2,
+.section-row h2,
+.section-row h3 {
+  margin: 0;
+}
+
+.soft-panel {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
+}
+
+.section-title h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #44403c;
+}
+
+.section-title p,
+.subtext {
+  margin: 4px 0 0;
+  color: #292524;
+  font-size: 12px;
+}
+
+.drink-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.drink-grid button,
+.stage-list button {
+  padding: 12px;
+  border: 1px solid #e7e5e4;
+  border-radius: 18px;
+  background: white;
+  text-align: left;
+}
+
+.drink-grid button.selected,
+.stage-list button.selected {
+  border-color: #fda4af;
+  background: #fff1f2;
+}
+
+.drink-grid button > div,
+.stage-list button > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drink-grid p,
+.stage-list p {
+  margin: 6px 0 0;
+  color: #44403c;
+  font-size: 11px;
+}
+
+.drink-grid span,
+.stage-list span {
+  color: #292524;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.custom-box {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 22px;
+  background: white;
+}
+
+.soft-result,
+.result-box,
+.code-box {
+  margin: 12px 0;
+  padding: 16px;
+  border-radius: 24px;
+  background: #f5f5f4;
+}
+
+.soft-result p,
+.result-box p,
+.code-box p {
+  margin: 0;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.soft-result strong,
+.result-box strong,
+.code-box strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+}
+
+.result-box {
+  text-align: center;
+  background: #fffbeb;
+}
+
+.result-box strong {
+  color: #78350f;
+  font-size: 30px;
+}
+
+.soft-result span,
+.result-box span,
+.code-box span {
+  display: block;
+  margin-top: 5px;
+  color: #44403c;
+  font-size: 12px;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.list-item,
+.rank-row,
+.record-detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.035);
+}
+
+.list-item p,
+.rank-row p,
+.record-detail p {
+  margin: 4px 0 0;
+  color: #44403c;
+  font-size: 12px;
+}
+
+.icon-delete {
+  border: 0;
+  border-radius: 12px;
+  padding: 8px;
+  color: #292524;
+  background: #f5f5f4;
+}
+
+.stage-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.calendar-head,
+.month-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-head button,
+.month-nav button {
+  border: 0;
+  border-radius: 14px;
+  padding: 8px 12px;
+  background: #f5f5f4;
+  color: #44403c;
+  font-weight: 700;
+}
+
+.month-nav {
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 18px;
+  background: #f5f5f4;
+}
+
+.month-nav button {
+  background: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekdays {
+  margin: 14px 0 6px;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.calendar-grid button {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 14px;
+  color: #292524;
+  background: #f5f5f4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-grid button.has-capacity {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
+.calendar-grid button.selected {
+  background: #1c1917;
+  color: white;
+}
+
+.calendar-grid button em {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #be123c;
+  font-style: normal;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.calendar-grid button.selected em {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+}
+
+.record-detail {
+  margin-top: 14px;
+  align-items: flex-start;
+  background: #f5f5f4;
+}
+
+.code-box {
+  text-align: center;
+}
+
+.code-box strong {
+  font-size: 38px;
+  letter-spacing: 0.15em;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.input-row input {
+  margin: 0;
+}
+
+.divider-section {
+  padding-top: 16px;
+  border-top: 1px solid #e7e5e4;
+}
+
+.divider-section > p {
+  margin: 0 0 8px;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.room-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px;
+  background: #f5f5f4;
+  text-align: left;
+}
+
+.room-card p {
+  margin: 0;
+  color: #292524;
+  font-size: 12px;
+}
+
+.room-card strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+}
+
+.room-card span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: white;
+  color: #44403c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hint {
+  margin: -2px 0 0;
+  text-align: center;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rank-row > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank-num {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 700;
+}
+
+.chart-panel {
+  margin-top: 14px;
+}
+
+.chart-box,
+.empty-chart {
+  height: 260px;
+  border-radius: 18px;
+  background: white;
+}
+
+.empty-chart {
+  display: grid;
+  place-items: center;
+  color: #292524;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 18px;
+  background: white;
+  color: #292524;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.dot.pink {
+  background: #fb7185;
+}
+
+.dot.blue {
+  background: #60a5fa;
+}
+
+.empty-small {
+  padding: 14px;
+  border-radius: 18px;
+  background: white;
+  color: #292524;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.right {
+  text-align: right;
+}
+
+@media (max-width: 420px) {
+  .trend-button {
+    position: static;
+    margin-bottom: 10px;
+  }
+
+  .ranking-button {
+    top: 16px;
+    right: 0;
+  }
+
+  .main-header {
+    padding-top: 6px;
+  }
+
+  .main-header .icon-badge {
+    margin-top: 8px;
+  }
+}
+
+
+/* 가독성 보정 */
+p,
+span,
+label,
+button,
+input,
+strong,
+h1,
+h2,
+h3 {
+  color: #292524;
+}
+
+.subtext,
+.hint,
+.notice-box,
+.notice-line,
+.section-title p,
+.soft-result span,
+.result-box span,
+.code-box span,
+.list-item p,
+.rank-row p,
+.record-detail p,
+.divider-section > p,
+.empty-small,
+.empty-chart,
+.main-header p,
+.simple-header p {
+  color: #44403c !important;
+}
+
+.field,
+.main-stat-row p,
+.mini-stat p,
+.stat-box p,
+.soft-result p,
+.result-box p,
+.code-box p,
+.weekdays,
+.calendar-head button,
+.month-nav button {
+  color: #44403c !important;
+}
+
+.text-link {
+  color: #57534e !important;
+}
+
+.soju-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff7ed, #ffe4e6);
+  color: #be123c;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  box-shadow: inset 0 0 0 2px rgba(251, 113, 133, 0.18);
+}
+
+.small-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.icon-delete .small-icon {
+  min-width: 34px;
+  color: #7f1d1d;
+  background: #fee2e2;
+}
+
+.trend-button p,
+.trend-button span,
+.ranking-button {
+  color: #292524 !important;
+}
+
+.standard-badge {
+  color: #78350f !important;
+}
+
+.app-button,
+.app-button * {
+  color: white !important;
+}
+
+.app-button.white,
+.app-button.white * {
+  color: #292524 !important;
+}
+
+.calendar-grid button.selected,
+.calendar-grid button.selected span,
+.calendar-grid button.selected em {
+  color: white !important;
+}
+
+.up {
+  color: #e11d48 !important;
+}
+
+.down {
+  color: #2563eb !important;
+}
+
+
+/* ===== 최종 가독성/폰트/아이콘 보정 ===== */
+:root {
+  color: #111111 !important;
+  font-family:
+    "Arial Rounded MT Bold",
+    "Pretendard",
+    "SUIT",
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    system-ui,
+    sans-serif !important;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  color: #111111 !important;
+  font-family:
+    "Arial Rounded MT Bold",
+    "Pretendard",
+    "SUIT",
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    system-ui,
+    sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+p,
+span,
+strong,
+label,
+em,
+div {
+  color: #111111;
+}
+
+.main-header h1,
+.simple-header h1,
+.login-title h1 {
+  color: #050505 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.main-header p,
+.simple-header p,
+.section-title p,
+.subtext,
+.hint,
+.notice-box,
+.notice-line,
+.soft-result span,
+.result-box span,
+.code-box span,
+.list-item p,
+.rank-row p,
+.record-detail p,
+.divider-section > p,
+.empty-small,
+.empty-chart {
+  color: #1f1f1f !important;
+}
+
+.field,
+.field input,
+.input-row input,
+.main-stat-row p,
+.mini-stat p,
+.stat-box p,
+.soft-result p,
+.result-box p,
+.code-box p,
+.weekdays,
+.calendar-head button,
+.month-nav button,
+.text-link {
+  color: #111111 !important;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+.soft-panel,
+.mini-stat,
+.stat-box,
+.soft-result,
+.record-detail,
+.month-nav,
+.calendar-head button,
+.month-nav button,
+.empty-small,
+.code-box {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.drink-grid button,
+.stage-list button,
+.list-item,
+.rank-row,
+.room-card,
+.field-box,
+.field input,
+.input-row input {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-color: #d6d3d1 !important;
+}
+
+.drink-grid button.selected,
+.stage-list button.selected,
+.calendar-grid button.has-capacity {
+  background: #ffe4e6 !important;
+  color: #111111 !important;
+  border-color: #fb7185 !important;
+}
+
+.drink-grid p,
+.stage-list p,
+.drink-grid span,
+.stage-list span {
+  color: #222222 !important;
+}
+
+.main-stat-row strong,
+.result-box strong,
+.soft-result strong,
+.stat-box strong,
+.mini-stat strong {
+  color: #050505 !important;
+}
+
+.standard-badge {
+  background: #fef3c7 !important;
+  color: #111111 !important;
+}
+
+.trend-button,
+.ranking-button {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.trend-button p,
+.trend-button span,
+.ranking-button {
+  color: #111111 !important;
+}
+
+.app-button {
+  background: #fb7185 !important;
+  color: #ffffff !important;
+}
+
+.app-button * {
+  color: #ffffff !important;
+}
+
+.app-button.dark {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+.app-button.white {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #d6d3d1 !important;
+}
+
+.app-button.white * {
+  color: #111111 !important;
+}
+
+.calendar-grid button {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #e7e5e4 !important;
+}
+
+.calendar-grid button.selected {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+.calendar-grid button.selected span,
+.calendar-grid button.selected em {
+  color: #ffffff !important;
+}
+
+.calendar-grid button em {
+  color: #111111 !important;
+  background: rgba(255,255,255,0.9) !important;
+}
+
+.up {
+  color: #e11d48 !important;
+}
+
+.down {
+  color: #2563eb !important;
+}
+
+.icon-badge {
+  background: #ffffff !important;
+}
+
+.drink-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 19px;
+  background: linear-gradient(135deg, #fff7ed, #ffe4e6);
+  font-size: 30px;
+  line-height: 1;
+  box-shadow:
+    inset 0 0 0 2px rgba(251, 113, 133, 0.18),
+    0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.soju-icon {
+  display: none !important;
+}
+
+.small-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #fff1f2 !important;
+  color: #111111 !important;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.icon-delete .small-icon {
+  min-width: 26px;
+  color: #111111 !important;
+  background: #fee2e2 !important;
+}
+
+.legend,
+.legend span {
+  color: #111111 !important;
+}
+
+.notice-line svg {
+  color: #111111 !important;
+}
