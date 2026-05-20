@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { supabase } from "./supabaseClient";
 import "./App.css";
 
 const STAGES = [
@@ -91,6 +92,20 @@ function getMonthDays(dateString) {
   return { year, month, days };
 }
 
+function dbRecordToApp(record) {
+  return {
+    id: record.id,
+    date: record.date,
+    drinks: record.drinks || [],
+    sojuAmount: Number(record.soju_amount || 0),
+    hours: Number(record.hours || 1),
+    stage: Number(record.stage || 1),
+    capacityBph: Number(record.capacity_bph || 0),
+    memo: record.memo || "",
+    createdAt: record.created_at,
+  };
+}
+
 function Card({ children, className = "" }) {
   return <section className={`card ${className}`}>{children}</section>;
 }
@@ -127,22 +142,10 @@ export default function App() {
   const [roomCode, setRoomCode] = useState("");
   const [activeRoom, setActiveRoom] = useState(null);
   const [roomError, setRoomError] = useState("");
-  const [roomTick, setRoomTick] = useState(0);
   const [screen, setScreen] = useState("main");
   const [myRooms, setMyRooms] = useState([]);
-
-  const storageKey = user ? `julyang-records-${user.id}` : null;
-
-  useEffect(() => {
-    if (!user) return;
-    setRecords(safeRead(`julyang-records-${user.id}`, []));
-    setMyRooms(safeRead(`julyang-user-rooms-${user.id}`, []));
-  }, [user]);
-
-  useEffect(() => {
-    if (!storageKey) return;
-    safeWrite(storageKey, records);
-  }, [records, storageKey]);
+  const [roomMembers, setRoomMembers] = useState([]);
+  const [isBusy, setIsBusy] = useState(false);
 
   const selectedDrink = DRINKS.find((drink) => drink.id === drinkId) || DRINKS[0];
   const isCustomDrink = drinkId === "custom";
@@ -248,16 +251,94 @@ export default function App() {
     return null;
   };
 
-  const roomMembers = useMemo(() => {
-    if (!activeRoom) return [];
-    return safeRead(`julyang-room-${activeRoom}`, []).sort((a, b) => b.capacity - a.capacity);
-  }, [activeRoom, roomTick]);
+  async function loadRecords(userId = user?.id) {
+    if (!userId) return;
+    const { data, error } = await supabase
+      .from("records")
+      .select("*")
+      .eq("user_id", userId)
+      .order("date", { ascending: true });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setRecords((data || []).map(dbRecordToApp));
+  }
+
+  async function loadMyRooms(userId = user?.id) {
+    if (!userId) return;
+    const { data, error } = await supabase
+      .from("room_members")
+      .select("room_code, updated_at")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setMyRooms((data || []).map((room) => ({ code: room.room_code, joinedAt: room.updated_at })));
+  }
+
+  async function loadRoomMembers(code = activeRoom) {
+    if (!code) return;
+    const { data, error } = await supabase
+      .from("room_members")
+      .select("*")
+      .eq("room_code", code)
+      .order("capacity", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      setRoomError(error.message);
+      return;
+    }
+
+    setRoomMembers((data || []).map((member) => ({
+      userId: member.user_id,
+      name: member.name,
+      capacity: Number(member.capacity || 0),
+      updatedAt: member.updated_at,
+    })));
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    loadRecords(user.id);
+    loadMyRooms(user.id);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!activeRoom) return;
+
+    loadRoomMembers(activeRoom);
+
+    const channel = supabase
+      .channel(`room-${activeRoom}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "room_members",
+          filter: `room_code=eq.${activeRoom}`,
+        },
+        () => loadRoomMembers(activeRoom)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeRoom]);
 
   useEffect(() => {
     if (!activeRoom || !user) return;
     putMeInRoom(activeRoom, stats.current || estimated || 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeRoom, user, stats.current, estimated]);
+  }, [activeRoom, user?.id, stats.current, estimated]);
 
   const resetDraft = () => {
     setDrinkItems([]);
@@ -279,7 +360,7 @@ export default function App() {
 
   const goToday = () => changeSelectedDate(today());
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     const name = loginName.trim();
     const password = loginPassword.trim();
     if (!name || !password) {
@@ -287,24 +368,48 @@ export default function App() {
       return;
     }
 
-    const users = safeRead("julyang-users", []);
-    const duplicated = users.some((savedUser) => savedUser.name === name && savedUser.password === password);
-    if (duplicated) {
-      setLoginError("이미 등록된 계정이에요. 로그인으로 들어가 주세요.");
+    setIsBusy(true);
+    setLoginError("");
+
+    const { data: existing, error: selectError } = await supabase
+      .from("app_users")
+      .select("id")
+      .eq("name", name)
+      .eq("password", password)
+      .maybeSingle();
+
+    if (selectError) {
+      setLoginError(selectError.message);
+      setIsBusy(false);
       return;
     }
 
-    const newUser = { id: `user_${makeId()}`, name, password, createdAt: new Date().toISOString() };
-    safeWrite("julyang-users", [...users, newUser]);
+    if (existing) {
+      setLoginError("이미 등록된 계정이에요. 로그인으로 들어가 주세요.");
+      setIsBusy(false);
+      return;
+    }
 
-    const currentUser = { id: newUser.id, name: newUser.name };
+    const { data, error } = await supabase
+      .from("app_users")
+      .insert({ name, password })
+      .select("id, name")
+      .single();
+
+    if (error) {
+      setLoginError(error.message);
+      setIsBusy(false);
+      return;
+    }
+
+    const currentUser = { id: data.id, name: data.name };
     setUser(currentUser);
     safeWrite("julyang-current-user", currentUser);
     setLoginPassword("");
-    setLoginError("");
+    setIsBusy(false);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const name = loginName.trim();
     const password = loginPassword.trim();
     if (!name || !password) {
@@ -312,24 +417,42 @@ export default function App() {
       return;
     }
 
-    const users = safeRead("julyang-users", []);
-    const foundUser = users.find((savedUser) => savedUser.name === name && savedUser.password === password);
-    if (!foundUser) {
-      setLoginError("등록된 계정을 찾을 수 없어요.");
+    setIsBusy(true);
+    setLoginError("");
+
+    const { data, error } = await supabase
+      .from("app_users")
+      .select("id, name")
+      .eq("name", name)
+      .eq("password", password)
+      .maybeSingle();
+
+    if (error) {
+      setLoginError(error.message);
+      setIsBusy(false);
       return;
     }
 
-    const currentUser = { id: foundUser.id, name: foundUser.name };
+    if (!data) {
+      setLoginError("등록된 계정을 찾을 수 없어요.");
+      setIsBusy(false);
+      return;
+    }
+
+    const currentUser = { id: data.id, name: data.name };
     setUser(currentUser);
     safeWrite("julyang-current-user", currentUser);
     setLoginPassword("");
-    setLoginError("");
+    setIsBusy(false);
   };
 
   const handleLogout = () => {
     setUser(null);
     setRecords([]);
     setDrinkItems([]);
+    setMyRooms([]);
+    setRoomMembers([]);
+    setActiveRoom(null);
     localStorage.removeItem("julyang-current-user");
   };
 
@@ -357,110 +480,145 @@ export default function App() {
     setDrinkItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const addRecord = () => {
-    if (!estimated || estimated <= 0 || drinkItems.length === 0) return;
+  const addRecord = async () => {
+    if (!user || !estimated || estimated <= 0 || drinkItems.length === 0) return;
 
-    const newRecord = {
-      id: makeId(),
+    const payload = {
+      user_id: user.id,
       date: selectedDate,
       drinks: drinkItems,
-      sojuAmount: Number(totalSojuAmount.toFixed(3)),
+      soju_amount: Number(totalSojuAmount.toFixed(3)),
       hours: Number(hours),
       stage: Number(stage),
-      capacityBph: Number(estimated.toFixed(3)),
+      capacity_bph: Number(estimated.toFixed(3)),
       memo,
-      createdAt: new Date().toISOString(),
     };
 
-    setRecords((prev) =>
-      [...prev.filter((record) => record.date !== selectedDate), newRecord].sort((a, b) =>
-        a.date.localeCompare(b.date)
-      )
-    );
+    const { error } = await supabase
+      .from("records")
+      .upsert(payload, { onConflict: "user_id,date" });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadRecords(user.id);
+    if (activeRoom) await putMeInRoom(activeRoom, Number(estimated.toFixed(3)));
     setMemo("");
   };
 
-  const removeRecord = (id) => {
-    setRecords((prev) => prev.filter((record) => record.id !== id));
-  };
-
-  const cancelSelectedDateRecord = () => {
-    setRecords((prev) => prev.filter((record) => record.date !== selectedDate));
-    setMemo("");
-  };
-
-  const saveMyRoom = (code) => {
-    if (!user || !code) return;
-    const room = { code, joinedAt: new Date().toISOString() };
-    const next = [room, ...myRooms.filter((savedRoom) => savedRoom.code !== code)];
-    setMyRooms(next);
-    safeWrite(`julyang-user-rooms-${user.id}`, next);
-  };
-
-  const putMeInRoom = (code, capacityValue = null) => {
+  const removeRecord = async (id) => {
     if (!user) return;
+    const { error } = await supabase.from("records").delete().eq("id", id).eq("user_id", user.id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    await loadRecords(user.id);
+  };
+
+  const cancelSelectedDateRecord = async () => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("records")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("date", selectedDate);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setMemo("");
+    await loadRecords(user.id);
+  };
+
+  const ensureRoom = async (code) => {
+    if (!user || !code) return;
+    await supabase.from("rooms").upsert(
+      { code, created_by: user.id },
+      { onConflict: "code" }
+    );
+  };
+
+  async function putMeInRoom(code, capacityValue = null) {
+    if (!user || !code) return;
     const current = capacityValue ?? stats.current ?? estimated ?? 0;
-    const saved = safeRead(`julyang-room-${code}`, []);
-    const next = [
-      ...saved.filter((member) => member.userId !== user.id),
-      { userId: user.id, name: user.name, capacity: Number((current || 0).toFixed(3)), updatedAt: new Date().toISOString() },
-    ].sort((a, b) => b.capacity - a.capacity);
-    safeWrite(`julyang-room-${code}`, next);
-    setRoomTick((prev) => prev + 1);
-  };
 
-  const openSavedRoom = (code) => {
+    const { error } = await supabase.from("room_members").upsert(
+      {
+        room_code: code,
+        user_id: user.id,
+        name: user.name,
+        capacity: Number((current || 0).toFixed(3)),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "room_code,user_id" }
+    );
+
+    if (error) {
+      console.error(error);
+      setRoomError(error.message);
+      return;
+    }
+
+    await loadMyRooms(user.id);
+    await loadRoomMembers(code);
+  }
+
+  const openSavedRoom = async (code) => {
     setActiveRoom(code);
     setRoomCode(code);
     setRoomError("");
-    if (!localStorage.getItem(`julyang-room-${code}`)) safeWrite(`julyang-room-${code}`, []);
-    putMeInRoom(code);
+    await ensureRoom(code);
+    await putMeInRoom(code);
     setScreen("room");
   };
 
-  const createRoomCode = () => {
+  const createRoomCode = async () => {
     const code = Math.random().toString(36).slice(2, 8).toUpperCase();
-    if (!localStorage.getItem(`julyang-room-${code}`)) safeWrite(`julyang-room-${code}`, []);
     setActiveRoom(code);
     setRoomCode(code);
     setRoomError("");
-    saveMyRoom(code);
-    putMeInRoom(code);
+    await ensureRoom(code);
+    await putMeInRoom(code);
     setScreen("room");
   };
 
-  const joinRoom = () => {
+  const joinRoom = async () => {
     const code = roomCode.trim().toUpperCase();
     if (!code) {
       setRoomError("공유 코드를 입력해 주세요.");
       return;
     }
-    if (!localStorage.getItem(`julyang-room-${code}`)) safeWrite(`julyang-room-${code}`, []);
+
     setActiveRoom(code);
     setRoomCode(code);
     setRoomError("");
-    saveMyRoom(code);
-    putMeInRoom(code);
+    await ensureRoom(code);
+    await putMeInRoom(code);
     setScreen("room");
   };
 
-  const leaveRoom = () => {
+  const leaveRoom = async () => {
     if (!activeRoom || !user) return;
+    const { error } = await supabase
+      .from("room_members")
+      .delete()
+      .eq("room_code", activeRoom)
+      .eq("user_id", user.id);
 
-    const savedMembers = safeRead(`julyang-room-${activeRoom}`, []);
-    safeWrite(
-      `julyang-room-${activeRoom}`,
-      savedMembers.filter((member) => member.userId !== user.id)
-    );
+    if (error) {
+      setRoomError(error.message);
+      return;
+    }
 
-    const nextRooms = myRooms.filter((room) => room.code !== activeRoom);
-    setMyRooms(nextRooms);
-    safeWrite(`julyang-user-rooms-${user.id}`, nextRooms);
-
+    await loadMyRooms(user.id);
     setActiveRoom(null);
     setRoomCode("");
     setRoomError("");
-    setRoomTick((prev) => prev + 1);
     setScreen("roomHome");
   };
 
@@ -611,7 +769,7 @@ export default function App() {
             </div>
 
             <div className="grid two">
-              <AppButton onClick={() => setRoomTick((prev) => prev + 1)} className="dark">새로고침</AppButton>
+              <AppButton onClick={() => loadRoomMembers(activeRoom)} className="dark">새로고침</AppButton>
               <AppButton onClick={leaveRoom} className="white">랭킹 나가기</AppButton>
             </div>
             <p className="hint">내 주량은 기록이 바뀌면 자동으로 반영돼요.</p>
@@ -692,8 +850,8 @@ export default function App() {
 
             {loginError && <p className="error">{loginError}</p>}
 
-            <AppButton onClick={isLogin ? handleLogin : handleSignup}>
-              {isLogin ? "로그인" : "회원가입"}
+            <AppButton onClick={isLogin ? handleLogin : handleSignup} disabled={isBusy}>
+              {isBusy ? "처리 중..." : isLogin ? "로그인" : "회원가입"}
             </AppButton>
 
             <div className="notice-box">회원가입한 이름과 비밀번호로 다시 들어오면 이전 기록이 이어집니다. 지금은 가볍게 쓰는 버전이라 보안용 로그인은 아니에요.</div>
